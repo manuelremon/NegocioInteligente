@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Alert, Button, Stack, Center, Text, Loader } from '@mantine/core'
+import { Alert, Button, Stack, Center, Text, Loader, Paper, Group } from '@mantine/core'
 import { useNavigate } from 'react-router-dom'
 import { useCartStore } from '@renderer/stores/cartStore'
 import { useRegisterStore } from '@renderer/stores/registerStore'
@@ -35,7 +35,6 @@ export default function VentasPage(): JSX.Element {
   const amountNum = amountTendered
   const change = paymentMethod === 'cash' ? Math.max(0, amountNum - total) : 0
 
-  // Check for active register session on mount
   const checkActiveSession = useCallback(async () => {
     setCheckingSession(true)
     try {
@@ -56,7 +55,6 @@ export default function VentasPage(): JSX.Element {
     checkActiveSession()
   }, [checkActiveSession])
 
-  // Keep amountTendered in sync for non-cash
   useEffect(() => {
     if (paymentMethod !== 'cash') {
       setAmountTendered(total)
@@ -92,7 +90,6 @@ export default function VentasPage(): JSX.Element {
     setLastSale(null)
   }, [])
 
-  // Global keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'F1') {
@@ -143,29 +140,27 @@ export default function VentasPage(): JSX.Element {
     pagoInputRef.current?.focus()
   }
 
-  // Loading state while checking session
   if (checkingSession) {
     return (
       <Center h="100%">
         <Stack align="center" gap="xs">
-          <Loader size="lg" />
+          <Loader size="lg" color="indigo" />
           <Text c="dimmed">Verificando sesion de caja...</Text>
         </Stack>
       </Center>
     )
   }
 
-  // No active session warning
   if (!currentSession) {
     return (
       <Center h="100%">
-        <Alert variant="light" color="yellow" title="Caja no abierta" maw={500}>
+        <Alert variant="light" color="yellow" title="Caja no abierta" maw={500} radius="lg">
           <Stack gap="sm">
             <Text size="sm">
               Para realizar ventas, primero debes abrir una sesion de caja.
               Ve al modulo de Caja para abrir una nueva sesion.
             </Text>
-            <Button variant="light" color="blue" onClick={() => navigate('/caja')}>
+            <Button variant="light" color="indigo" onClick={() => navigate('/caja')}>
               Ir a Caja
             </Button>
           </Stack>
@@ -182,28 +177,26 @@ export default function VentasPage(): JSX.Element {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          height: 'calc(100vh - 60px)',
-          fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-          fontSize: 12,
-          overflow: 'hidden'
+          height: 'calc(100vh - 80px)',
+          overflow: 'hidden',
+          borderRadius: 12,
+          border: '1px solid #e2e8f0',
+          background: '#ffffff'
         }}
       >
         {/* Main content area */}
-        <div style={{ display: 'flex', flex: 1, minHeight: 0, gap: 0 }}>
-          {/* ====== LEFT SIDE - Search + Cart table (60%) ====== */}
+        <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
+          {/* ====== LEFT SIDE - Search + Cart (60%) ====== */}
           <div
             style={{
               flex: '0 0 60%',
               display: 'flex',
               flexDirection: 'column',
-              borderRight: '2px solid #999',
+              borderRight: '1px solid #e2e8f0',
               overflow: 'hidden'
             }}
           >
-            {/* Product search bar */}
             <ProductSearch onAddToCart={handleAddToCart} />
-
-            {/* Cart items table */}
             <Cart />
           </div>
 
@@ -213,62 +206,54 @@ export default function VentasPage(): JSX.Element {
               flex: '0 0 40%',
               display: 'flex',
               flexDirection: 'column',
-              background: '#f0f0f0',
+              background: '#f8fafc',
               overflow: 'hidden'
             }}
           >
-            {/* Total Comprobante - Digital display */}
+            {/* Total display */}
             <div
               style={{
-                background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)',
-                padding: '14px 20px',
-                borderBottom: '2px solid #0f3460',
+                background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)',
+                padding: '20px 24px',
                 textAlign: 'right'
               }}
             >
-              <div
-                style={{
-                  color: '#7ec8e3',
-                  fontSize: 11,
-                  textTransform: 'uppercase',
-                  letterSpacing: 1,
-                  marginBottom: 4,
-                  fontWeight: 600
-                }}
+              <Text
+                size="xs"
+                c="rgba(255,255,255,0.6)"
+                fw={600}
+                tt="uppercase"
+                style={{ letterSpacing: 1.5, marginBottom: 6 }}
               >
-                Total Comprobante
-              </div>
-              <div
+                Total
+              </Text>
+              <Text
                 style={{
-                  color: '#00ff88',
-                  fontSize: 36,
-                  fontWeight: 700,
-                  fontFamily: "'Consolas', 'Courier New', monospace",
-                  textShadow: '0 0 10px rgba(0,255,136,0.3)',
+                  color: '#a5b4fc',
+                  fontSize: 38,
+                  fontWeight: 800,
+                  fontFamily: "'JetBrains Mono', 'Consolas', monospace",
                   lineHeight: 1.1
                 }}
               >
                 {formatCurrency(total)}
-              </div>
-              <div
-                style={{
-                  color: '#7ec8e3',
-                  fontSize: 10,
-                  marginTop: 4
-                }}
+              </Text>
+              <Text
+                size="xs"
+                c="rgba(255,255,255,0.45)"
+                mt={6}
               >
                 {totalArticles} articulo(s) en {items.length} linea(s)
-              </div>
+              </Text>
             </div>
 
             {/* Payment method buttons */}
             <div
               style={{
                 display: 'flex',
-                gap: 4,
-                padding: '8px 10px',
-                background: '#d8d8d8',
-                borderBottom: '1px solid #bbb'
+                gap: 6,
+                padding: '10px 14px',
+                borderBottom: '1px solid #e2e8f0'
               }}
             >
               <PaymentMethodButton
@@ -295,25 +280,24 @@ export default function VentasPage(): JSX.Element {
             <div
               style={{
                 flex: 1,
-                padding: '10px 14px',
+                padding: '14px 16px',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: 10,
+                gap: 12,
                 overflow: 'auto'
               }}
             >
               {/* Pago */}
-              <div>
+              <Paper withBorder p={0} radius="md" style={{ overflow: 'hidden' }}>
                 <div
                   style={{
-                    background: '#2c3e50',
-                    color: '#ecf0f1',
-                    padding: '6px 12px',
+                    background: '#1e293b',
+                    color: '#e2e8f0',
+                    padding: '6px 14px',
                     fontSize: 11,
                     fontWeight: 600,
                     textTransform: 'uppercase',
-                    letterSpacing: 1,
-                    borderRadius: '3px 3px 0 0'
+                    letterSpacing: 1.5
                   }}
                 >
                   Pago
@@ -327,16 +311,14 @@ export default function VentasPage(): JSX.Element {
                     placeholder="0.00"
                     style={{
                       width: '100%',
-                      padding: '10px 14px',
+                      padding: '12px 16px',
                       fontSize: 28,
                       fontWeight: 700,
-                      fontFamily: "'Consolas', monospace",
+                      fontFamily: "'JetBrains Mono', 'Consolas', monospace",
                       textAlign: 'right',
-                      border: '2px solid #2c3e50',
-                      borderTop: 'none',
-                      borderRadius: '0 0 3px 3px',
+                      border: 'none',
                       background: '#fff',
-                      color: '#2c3e50',
+                      color: '#1e293b',
                       outline: 'none',
                       boxSizing: 'border-box' as const
                     }}
@@ -345,36 +327,33 @@ export default function VentasPage(): JSX.Element {
                   <div
                     style={{
                       width: '100%',
-                      padding: '10px 14px',
+                      padding: '12px 16px',
                       fontSize: 28,
                       fontWeight: 700,
-                      fontFamily: "'Consolas', monospace",
+                      fontFamily: "'JetBrains Mono', 'Consolas', monospace",
                       textAlign: 'right',
-                      border: '2px solid #2c3e50',
-                      borderTop: 'none',
-                      borderRadius: '0 0 3px 3px',
-                      background: '#eee',
-                      color: '#2c3e50',
+                      background: '#f1f5f9',
+                      color: '#1e293b',
                       boxSizing: 'border-box' as const
                     }}
                   >
                     {formatCurrency(total)}
                   </div>
                 )}
-              </div>
+              </Paper>
 
               {/* Vuelto */}
-              <div>
+              <Paper withBorder p={0} radius="md" style={{ overflow: 'hidden' }}>
                 <div
                   style={{
-                    background: change > 0 ? '#27ae60' : '#7f8c8d',
+                    background: change > 0 ? '#059669' : '#94a3b8',
                     color: '#fff',
-                    padding: '6px 12px',
+                    padding: '6px 14px',
                     fontSize: 11,
                     fontWeight: 600,
                     textTransform: 'uppercase',
-                    letterSpacing: 1,
-                    borderRadius: '3px 3px 0 0'
+                    letterSpacing: 1.5,
+                    transition: 'background 200ms'
                   }}
                 >
                   Vuelto
@@ -382,30 +361,28 @@ export default function VentasPage(): JSX.Element {
                 <div
                   style={{
                     width: '100%',
-                    padding: '10px 14px',
+                    padding: '12px 16px',
                     fontSize: 28,
                     fontWeight: 700,
-                    fontFamily: "'Consolas', monospace",
+                    fontFamily: "'JetBrains Mono', 'Consolas', monospace",
                     textAlign: 'right',
-                    border: `2px solid ${change > 0 ? '#27ae60' : '#7f8c8d'}`,
-                    borderTop: 'none',
-                    borderRadius: '0 0 3px 3px',
-                    background: change > 0 ? '#f0fff4' : '#f5f5f5',
-                    color: change > 0 ? '#27ae60' : '#95a5a6',
-                    boxSizing: 'border-box' as const
+                    background: change > 0 ? '#f0fdf4' : '#f8fafc',
+                    color: change > 0 ? '#059669' : '#94a3b8',
+                    boxSizing: 'border-box' as const,
+                    transition: 'all 200ms'
                   }}
                 >
                   {formatCurrency(change)}
                 </div>
-              </div>
+              </Paper>
 
-              {/* Quick amount buttons for cash */}
+              {/* Quick amount buttons */}
               {paymentMethod === 'cash' && (
                 <div
                   style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(4, 1fr)',
-                    gap: 4,
+                    gap: 6,
                     marginTop: 4
                   }}
                 >
@@ -414,16 +391,23 @@ export default function VentasPage(): JSX.Element {
                       key={amt}
                       onClick={() => handleQuickAmount(amt)}
                       style={{
-                        padding: '6px 4px',
-                        fontSize: 11,
+                        padding: '8px 4px',
+                        fontSize: 12,
                         fontWeight: 600,
-                        background: 'linear-gradient(180deg, #f8f8f8 0%, #e0e0e0 100%)',
-                        border: '1px solid #aaa',
-                        borderRadius: 3,
+                        background: '#ffffff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: 8,
                         cursor: 'pointer',
-                        boxShadow:
-                          '0 1px 2px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)',
-                        color: '#333'
+                        color: '#334155',
+                        transition: 'all 100ms ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        ;(e.currentTarget as HTMLElement).style.background = '#eef2ff'
+                        ;(e.currentTarget as HTMLElement).style.borderColor = '#a5b4fc'
+                      }}
+                      onMouseLeave={(e) => {
+                        ;(e.currentTarget as HTMLElement).style.background = '#ffffff'
+                        ;(e.currentTarget as HTMLElement).style.borderColor = '#e2e8f0'
                       }}
                     >
                       ${amt.toLocaleString('es-AR')}
@@ -437,148 +421,87 @@ export default function VentasPage(): JSX.Element {
             <div
               style={{
                 display: 'flex',
-                gap: 4,
-                padding: '8px 10px',
-                background: '#d0d0d0',
-                borderTop: '1px solid #bbb',
+                gap: 6,
+                padding: '10px 14px',
+                borderTop: '1px solid #e2e8f0',
                 flexShrink: 0
               }}
             >
-              <button
+              <Button
                 onClick={handleCheckout}
                 disabled={items.length === 0}
-                style={{
-                  flex: 2,
-                  padding: '12px 8px',
-                  fontSize: 14,
-                  fontWeight: 700,
-                  background:
-                    items.length === 0
-                      ? '#bbb'
-                      : 'linear-gradient(180deg, #27ae60 0%, #1e8449 100%)',
-                  color: '#fff',
-                  border: items.length === 0 ? '1px solid #999' : '1px solid #196f3d',
-                  borderRadius: 4,
-                  cursor: items.length === 0 ? 'not-allowed' : 'pointer',
-                  boxShadow:
-                    items.length === 0
-                      ? 'none'
-                      : '0 2px 4px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.2)',
-                  textShadow: '0 1px 1px rgba(0,0,0,0.3)'
-                }}
+                color="green"
+                size="md"
+                style={{ flex: 2 }}
+                radius="md"
               >
                 COBRAR [F2]
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleNewSale}
-                style={{
-                  flex: 1,
-                  padding: '12px 8px',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  background: 'linear-gradient(180deg, #3498db 0%, #2980b9 100%)',
-                  color: '#fff',
-                  border: '1px solid #2471a3',
-                  borderRadius: 4,
-                  cursor: 'pointer',
-                  boxShadow:
-                    '0 2px 4px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.2)',
-                  textShadow: '0 1px 1px rgba(0,0,0,0.3)'
-                }}
+                variant="light"
+                color="indigo"
+                size="md"
+                style={{ flex: 1 }}
               >
                 Nuevo [F1]
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleNewSale}
-                style={{
-                  flex: 1,
-                  padding: '12px 8px',
-                  fontSize: 12,
-                  fontWeight: 600,
-                  background: 'linear-gradient(180deg, #e74c3c 0%, #c0392b 100%)',
-                  color: '#fff',
-                  border: '1px solid #a93226',
-                  borderRadius: 4,
-                  cursor: 'pointer',
-                  boxShadow:
-                    '0 2px 4px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.2)',
-                  textShadow: '0 1px 1px rgba(0,0,0,0.3)'
-                }}
+                variant="light"
+                color="red"
+                size="md"
+                style={{ flex: 1 }}
               >
-                Cancelar [Esc]
-              </button>
+                Cancelar
+              </Button>
             </div>
           </div>
         </div>
 
-        {/* ====== BOTTOM BAR - Full-width Total ====== */}
+        {/* ====== BOTTOM BAR ====== */}
         <div
           style={{
-            background: 'linear-gradient(180deg, #2c3e50 0%, #1a252f 100%)',
-            padding: '6px 20px',
+            background: '#1e293b',
+            padding: '8px 20px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            borderTop: '2px solid #1a252f',
-            flexShrink: 0
+            flexShrink: 0,
+            borderRadius: '0 0 12px 12px'
           }}
         >
-          <div
-            style={{
-              color: '#95a5a6',
-              fontSize: 11,
-              display: 'flex',
-              gap: 16
-            }}
-          >
-            <span>F1: Nuevo</span>
-            <span>F2: Cobrar</span>
-            <span>F5: Efectivo</span>
-            <span>F6: Tarjeta</span>
-            <span>F7: Fiado</span>
-            <span>Enter: Agregar producto</span>
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12
-            }}
-          >
-            <span
-              style={{
-                color: '#bdc3c7',
-                fontSize: 14,
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: 1
-              }}
-            >
+          <Group gap="lg">
+            <Text size="xs" c="rgba(255,255,255,0.4)">F1 Nuevo</Text>
+            <Text size="xs" c="rgba(255,255,255,0.4)">F2 Cobrar</Text>
+            <Text size="xs" c="rgba(255,255,255,0.4)">F5 Efectivo</Text>
+            <Text size="xs" c="rgba(255,255,255,0.4)">F6 Tarjeta</Text>
+            <Text size="xs" c="rgba(255,255,255,0.4)">F7 Fiado</Text>
+          </Group>
+          <Group gap="sm">
+            <Text size="sm" c="rgba(255,255,255,0.5)" fw={600} tt="uppercase" style={{ letterSpacing: 1 }}>
               Total:
-            </span>
-            <span
+            </Text>
+            <Text
               style={{
-                color: '#00ff88',
-                fontSize: 28,
-                fontWeight: 700,
-                fontFamily: "'Consolas', 'Courier New', monospace",
-                textShadow: '0 0 8px rgba(0,255,136,0.3)'
+                color: '#a5b4fc',
+                fontSize: 24,
+                fontWeight: 800,
+                fontFamily: "'JetBrains Mono', 'Consolas', monospace"
               }}
             >
               {formatCurrency(total)}
-            </span>
-          </div>
+            </Text>
+          </Group>
         </div>
       </div>
 
-      {/* Payment confirmation modal */}
       <PaymentModal
         opened={paymentOpened}
         onClose={() => setPaymentOpened(false)}
         onConfirm={handlePaymentConfirm}
       />
 
-      {/* Receipt modal */}
       <ReceiptModal
         opened={receiptOpened}
         onClose={handleReceiptClose}
@@ -600,32 +523,18 @@ function PaymentMethodButton({
   onClick: () => void
 }): JSX.Element {
   return (
-    <button
+    <Button
       onClick={onClick}
-      style={{
-        flex: 1,
-        padding: '8px 6px',
-        fontSize: 12,
-        fontWeight: 600,
-        background: active
-          ? 'linear-gradient(180deg, #3498db 0%, #2980b9 100%)'
-          : 'linear-gradient(180deg, #f0f0f0 0%, #d8d8d8 100%)',
-        color: active ? '#fff' : '#333',
-        border: active ? '2px solid #2471a3' : '1px solid #aaa',
-        borderRadius: 3,
-        cursor: 'pointer',
-        boxShadow: active
-          ? 'inset 0 1px 3px rgba(0,0,0,0.2), 0 1px 0 rgba(255,255,255,0.1)'
-          : '0 1px 2px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8)',
-        textShadow: active ? '0 1px 1px rgba(0,0,0,0.3)' : 'none',
-        display: 'flex',
-        flexDirection: 'column' as const,
-        alignItems: 'center',
-        gap: 2
-      }}
+      variant={active ? 'filled' : 'light'}
+      color={active ? 'indigo' : 'gray'}
+      size="sm"
+      style={{ flex: 1 }}
+      radius="md"
     >
-      <span>{label}</span>
-      <span style={{ fontSize: 9, opacity: 0.7 }}>[{shortcut}]</span>
-    </button>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+        <span style={{ fontSize: 12, fontWeight: 600 }}>{label}</span>
+        <span style={{ fontSize: 9, opacity: 0.7 }}>[{shortcut}]</span>
+      </div>
+    </Button>
   )
 }

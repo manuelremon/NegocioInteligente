@@ -43,6 +43,27 @@ const api = {
     lowStock: () => ipcRenderer.invoke('reports:lowStock'),
     debtors: () => ipcRenderer.invoke('reports:debtors'),
     cashHistory: (filters?: unknown) => ipcRenderer.invoke('reports:cashHistory', filters)
+  },
+  purchases: {
+    listSuppliers: (filters?: unknown) => ipcRenderer.invoke('purchases:listSuppliers', filters),
+    createSupplier: (data: unknown) => ipcRenderer.invoke('purchases:createSupplier', data),
+    updateSupplier: (data: unknown) => ipcRenderer.invoke('purchases:updateSupplier', data),
+    list: (filters?: unknown) => ipcRenderer.invoke('purchases:list', filters),
+    getById: (id: number) => ipcRenderer.invoke('purchases:getById', id),
+    create: (data: unknown) => ipcRenderer.invoke('purchases:create', data),
+    updateStatus: (id: number, status: string) =>
+      ipcRenderer.invoke('purchases:updateStatus', id, status),
+    registerPayment: (data: unknown) => ipcRenderer.invoke('purchases:registerPayment', data),
+    getSupplierLedger: (supplierId: number) =>
+      ipcRenderer.invoke('purchases:getSupplierLedger', supplierId)
+  },
+  settings: {
+    getAll: () => ipcRenderer.invoke('settings:getAll'),
+    get: (key: string) => ipcRenderer.invoke('settings:get', key),
+    set: (key: string, value: string) => ipcRenderer.invoke('settings:set', key, value),
+    setBatch: (entries: Record<string, string>) =>
+      ipcRenderer.invoke('settings:setBatch', entries),
+    getActiveModules: () => ipcRenderer.invoke('settings:getActiveModules')
   }
 }
 

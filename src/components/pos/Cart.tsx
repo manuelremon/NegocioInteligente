@@ -19,50 +19,41 @@ export default function Cart(): JSX.Element {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
-      {/* Scrollable table area */}
       <ScrollArea style={{ flex: 1 }} offsetScrollbars type="auto">
         <Table
-          verticalSpacing={3}
-          horizontalSpacing="xs"
-          striped
-          highlightOnHover
+          verticalSpacing={6}
+          horizontalSpacing="sm"
           withTableBorder
-          withColumnBorders
-          style={{ fontSize: '12px' }}
+          style={{ fontSize: '13px' }}
         >
           <Table.Thead>
-            <Table.Tr style={{
-              background: 'linear-gradient(180deg, #2c3e50 0%, #1a252f 100%)'
-            }}>
-              <Table.Th w={30} ta="center" style={{ position: 'sticky', top: 0 }}>
-                <Text size="xs" c="white" fw={700}>#</Text>
+            <Table.Tr style={{ background: '#f8fafc' }}>
+              <Table.Th w={36} ta="center">
+                <Text size="xs" c="dimmed" fw={600}>#</Text>
               </Table.Th>
-              <Table.Th w={80} style={{ position: 'sticky', top: 0 }}>
-                <Text size="xs" c="white" fw={700}>Codigo</Text>
+              <Table.Th>
+                <Text size="xs" c="dimmed" fw={600}>Producto</Text>
               </Table.Th>
-              <Table.Th style={{ position: 'sticky', top: 0 }}>
-                <Text size="xs" c="white" fw={700}>Descripcion</Text>
+              <Table.Th w={70} ta="center">
+                <Text size="xs" c="dimmed" fw={600}>Cant.</Text>
               </Table.Th>
-              <Table.Th w={60} ta="center" style={{ position: 'sticky', top: 0 }}>
-                <Text size="xs" c="white" fw={700}>Cant.</Text>
+              <Table.Th w={100} ta="right">
+                <Text size="xs" c="dimmed" fw={600}>Precio</Text>
               </Table.Th>
-              <Table.Th w={95} ta="right" style={{ position: 'sticky', top: 0 }}>
-                <Text size="xs" c="white" fw={700}>Precio Unit.</Text>
+              <Table.Th w={110} ta="right">
+                <Text size="xs" c="dimmed" fw={600}>Subtotal</Text>
               </Table.Th>
-              <Table.Th w={100} ta="right" style={{ position: 'sticky', top: 0 }}>
-                <Text size="xs" c="white" fw={700}>Subtotal</Text>
-              </Table.Th>
-              <Table.Th w={32} ta="center" style={{ position: 'sticky', top: 0 }}>
-                <Text size="xs" c="white" fw={700}>X</Text>
+              <Table.Th w={36} ta="center">
+                <Text size="xs" c="dimmed" fw={600}></Text>
               </Table.Th>
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
             {items.length === 0 ? (
               <Table.Tr>
-                <Table.Td colSpan={7} ta="center" py="xl">
+                <Table.Td colSpan={6} ta="center" py="xl">
                   <Text size="sm" c="dimmed">
-                    No hay productos en la venta. Escanee o busque un producto para agregar.
+                    No hay productos. Escanee o busque un producto para agregar.
                   </Text>
                 </Table.Td>
               </Table.Tr>
@@ -73,24 +64,17 @@ export default function Cart(): JSX.Element {
                 const lineTotal = lineGross - lineDiscount
 
                 return (
-                  <Table.Tr key={item.productId} style={{
-                    background: index % 2 === 0 ? '#ffffff' : '#f2f6fa'
-                  }}>
+                  <Table.Tr key={item.productId}>
                     <Table.Td ta="center">
-                      <Text size="xs" c="dimmed" style={{ fontSize: 11 }}>{index + 1}</Text>
+                      <Text size="xs" c="dimmed">{index + 1}</Text>
                     </Table.Td>
                     <Table.Td>
-                      <Text size="xs" ff="monospace" truncate="end" style={{ fontSize: 11 }}>
-                        {item.productId}
-                      </Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="xs" fw={500} lineClamp={1} style={{ fontSize: 12 }}>
+                      <Text size="sm" fw={500} lineClamp={1}>
                         {item.productName}
                         {item.discountPercent > 0 && (
-                          <span style={{ color: '#e67e22', fontSize: 10, marginLeft: 4 }}>
-                            (-{item.discountPercent}%)
-                          </span>
+                          <Text span size="xs" c="orange" ml={6}>
+                            -{item.discountPercent}%
+                          </Text>
                         )}
                       </Text>
                     </Table.Td>
@@ -108,35 +92,35 @@ export default function Cart(): JSX.Element {
                         min={1}
                         max={item.stock > 0 ? item.stock : undefined}
                         size="xs"
-                        w={50}
+                        w={56}
                         styles={{
                           input: {
                             textAlign: 'center',
-                            padding: '1px 2px',
-                            fontSize: '12px',
+                            fontSize: '13px',
                             fontWeight: 600,
-                            height: 24,
-                            minHeight: 24
+                            height: 28,
+                            minHeight: 28
                           }
                         }}
                         hideControls
                       />
                     </Table.Td>
                     <Table.Td ta="right">
-                      <Text size="xs" style={{ fontSize: 12 }}>{formatCurrency(item.unitPrice)}</Text>
+                      <Text size="sm" c="dimmed">{formatCurrency(item.unitPrice)}</Text>
                     </Table.Td>
                     <Table.Td ta="right">
-                      <Text size="xs" fw={600} style={{ fontSize: 12 }}>{formatCurrency(lineTotal)}</Text>
+                      <Text size="sm" fw={600}>{formatCurrency(lineTotal)}</Text>
                     </Table.Td>
                     <Table.Td ta="center">
                       <ActionIcon
                         variant="subtle"
                         color="red"
-                        size="xs"
+                        size="sm"
+                        radius="xl"
                         onClick={() => removeItem(item.productId)}
-                        title="Quitar del comprobante"
+                        title="Quitar"
                       >
-                        <Text size="xs" fw={700} style={{ fontSize: 11 }}>X</Text>
+                        <Text size="xs" fw={700}>X</Text>
                       </ActionIcon>
                     </Table.Td>
                   </Table.Tr>
@@ -149,18 +133,18 @@ export default function Cart(): JSX.Element {
 
       {/* Article count bar */}
       <div style={{
-        padding: '4px 12px',
-        background: '#e8e8e8',
-        borderTop: '1px solid #ccc',
+        padding: '6px 16px',
+        background: '#f8fafc',
+        borderTop: '1px solid #e2e8f0',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         flexShrink: 0
       }}>
-        <Text size="xs" fw={600} c="dimmed" style={{ fontSize: 12 }}>
-          Cant. Articulos: {totalArticles}
+        <Text size="xs" fw={500} c="dimmed">
+          {totalArticles} articulo(s)
         </Text>
-        <Text size="xs" fw={600} c="dimmed" style={{ fontSize: 12 }}>
+        <Text size="xs" fw={500} c="dimmed">
           {items.length} linea(s)
         </Text>
       </div>

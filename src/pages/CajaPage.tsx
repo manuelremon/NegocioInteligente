@@ -88,7 +88,7 @@ export default function CajaPage(): JSX.Element {
     <Stack gap="lg" pos="relative">
       <LoadingOverlay visible={loading} />
 
-      <Title order={2}>Caja Registradora</Title>
+      <Title order={3} c="#1e293b">Caja Registradora</Title>
 
       {/* Active session area */}
       {!currentSession ? (
@@ -98,13 +98,13 @@ export default function CajaPage(): JSX.Element {
           <SessionSummary session={currentSession} />
 
           <Group>
-            <Button color="teal" variant="light" onClick={cashInHandlers.open}>
+            <Button color="teal" variant="light" radius="md" onClick={cashInHandlers.open}>
               Ingreso de Efectivo
             </Button>
-            <Button color="red" variant="light" onClick={cashOutHandlers.open}>
+            <Button color="red" variant="light" radius="md" onClick={cashOutHandlers.open}>
               Egreso de Efectivo
             </Button>
-            <Button color="red" onClick={closeModalHandlers.open} ml="auto">
+            <Button color="red" radius="md" onClick={closeModalHandlers.open} ml="auto">
               Cerrar Caja
             </Button>
           </Group>
@@ -135,8 +135,8 @@ export default function CajaPage(): JSX.Element {
       )}
 
       {/* Session history */}
-      <Paper withBorder p="lg" radius="md">
-        <Title order={4} mb="md">
+      <Paper withBorder p="lg" radius="lg" bg="white">
+        <Title order={4} mb="md" c="#1e293b">
           Historial de Sesiones
         </Title>
 
@@ -145,16 +145,16 @@ export default function CajaPage(): JSX.Element {
             No hay sesiones anteriores registradas.
           </Text>
         ) : (
-          <Table striped highlightOnHover>
+          <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
             <Table.Thead>
-              <Table.Tr>
-                <Table.Th>Fecha Apertura</Table.Th>
-                <Table.Th>Fecha Cierre</Table.Th>
-                <Table.Th ta="right">Monto Inicial</Table.Th>
-                <Table.Th ta="right">Monto Final</Table.Th>
-                <Table.Th ta="right">Esperado</Table.Th>
-                <Table.Th ta="right">Diferencia</Table.Th>
-                <Table.Th ta="center">Estado</Table.Th>
+              <Table.Tr style={{ background: '#f8fafc' }}>
+                <Table.Th><Text size="xs" c="#64748b" fw={600}>Fecha Apertura</Text></Table.Th>
+                <Table.Th><Text size="xs" c="#64748b" fw={600}>Fecha Cierre</Text></Table.Th>
+                <Table.Th ta="right"><Text size="xs" c="#64748b" fw={600}>Monto Inicial</Text></Table.Th>
+                <Table.Th ta="right"><Text size="xs" c="#64748b" fw={600}>Monto Final</Text></Table.Th>
+                <Table.Th ta="right"><Text size="xs" c="#64748b" fw={600}>Esperado</Text></Table.Th>
+                <Table.Th ta="right"><Text size="xs" c="#64748b" fw={600}>Diferencia</Text></Table.Th>
+                <Table.Th ta="center"><Text size="xs" c="#64748b" fw={600}>Estado</Text></Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -166,18 +166,19 @@ export default function CajaPage(): JSX.Element {
 
                 return (
                   <Table.Tr key={s.id}>
-                    <Table.Td>{formatDate(s.openedAt)}</Table.Td>
-                    <Table.Td>{formatDate(s.closedAt)}</Table.Td>
-                    <Table.Td ta="right">{formatCurrency(s.openingFloat)}</Table.Td>
+                    <Table.Td><Text size="sm">{formatDate(s.openedAt)}</Text></Table.Td>
+                    <Table.Td><Text size="sm">{formatDate(s.closedAt)}</Text></Table.Td>
+                    <Table.Td ta="right"><Text size="sm">{formatCurrency(s.openingFloat)}</Text></Table.Td>
                     <Table.Td ta="right">
-                      {s.closingFloat != null ? formatCurrency(s.closingFloat) : '-'}
+                      <Text size="sm">{s.closingFloat != null ? formatCurrency(s.closingFloat) : '-'}</Text>
                     </Table.Td>
-                    <Table.Td ta="right">{formatCurrency(expected)}</Table.Td>
+                    <Table.Td ta="right"><Text size="sm">{formatCurrency(expected)}</Text></Table.Td>
                     <Table.Td ta="right">
                       {diff != null ? (
                         <Text
                           span
                           fw={600}
+                          size="sm"
                           c={diff === 0 ? 'green' : 'red'}
                         >
                           {formatCurrency(diff)}
@@ -190,6 +191,7 @@ export default function CajaPage(): JSX.Element {
                       <Badge
                         color={s.status === 'open' ? 'green' : 'gray'}
                         variant="light"
+                        radius="md"
                       >
                         {s.status === 'open' ? 'Abierta' : 'Cerrada'}
                       </Badge>

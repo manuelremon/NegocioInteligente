@@ -13,9 +13,48 @@ import App from './App'
 dayjs.locale('es')
 
 const theme = createTheme({
-  primaryColor: 'blue',
+  primaryColor: 'indigo',
   fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
-  defaultRadius: 'md'
+  defaultRadius: 'md',
+  colors: {
+    indigo: [
+      '#eef2ff', '#e0e7ff', '#c7d2fe', '#a5b4fc', '#818cf8',
+      '#6366f1', '#4f46e5', '#4338ca', '#3730a3', '#312e81'
+    ]
+  },
+  headings: {
+    fontFamily: 'Inter, system-ui, -apple-system, sans-serif',
+    fontWeight: '700'
+  },
+  components: {
+    Button: {
+      defaultProps: { radius: 'md' }
+    },
+    Paper: {
+      defaultProps: { radius: 'lg', shadow: 'xs' }
+    },
+    Modal: {
+      defaultProps: { radius: 'lg' }
+    },
+    TextInput: {
+      defaultProps: { radius: 'md' }
+    },
+    Select: {
+      defaultProps: { radius: 'md' }
+    },
+    NumberInput: {
+      defaultProps: { radius: 'md' }
+    },
+    Badge: {
+      defaultProps: { radius: 'md' }
+    },
+    Card: {
+      defaultProps: { radius: 'lg', shadow: 'sm' }
+    },
+    Table: {
+      defaultProps: { striped: 'odd', highlightOnHover: true }
+    }
+  }
 })
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

@@ -171,3 +171,96 @@ export interface Debtor {
   currentBalance: number
   lastPurchaseDate: string | null
 }
+
+/* ------------------------------------------------------------------ */
+/*  Purchases module                                                   */
+/* ------------------------------------------------------------------ */
+
+export interface Supplier {
+  id: number
+  name: string
+  phone: string | null
+  email: string | null
+  address: string | null
+  taxId: string | null
+  notes: string | null
+  currentBalance: number
+  isActive: boolean
+  createdAt: string
+}
+
+export interface Purchase {
+  id: number
+  supplierId: number
+  supplierName?: string
+  receiptNumber: string
+  subtotal: number
+  taxTotal: number
+  total: number
+  paymentMethod: 'cash' | 'card' | 'credit'
+  paymentStatus: 'paid' | 'partial' | 'pending'
+  status: 'draft' | 'completed' | 'cancelled'
+  notes: string | null
+  createdAt: string
+  items?: PurchaseItem[]
+}
+
+export interface PurchaseItem {
+  id: number
+  purchaseId: number
+  productId: number
+  productName: string
+  quantity: number
+  unitCost: number
+  taxRate: number
+  lineTotal: number
+}
+
+export interface PurchaseFilters {
+  from?: string
+  to?: string
+  supplierId?: number
+  status?: string
+  paymentStatus?: string
+}
+
+export interface SupplierLedgerEntry {
+  id: number
+  supplierId: number
+  purchaseId: number | null
+  amount: number
+  type: 'charge' | 'payment'
+  notes: string | null
+  createdAt: string
+}
+
+/* ------------------------------------------------------------------ */
+/*  Settings / License / Modules                                       */
+/* ------------------------------------------------------------------ */
+
+export type LicenseTier = 'basico' | 'pro' | 'enterprise'
+
+export interface ActiveModulesInfo {
+  tier: LicenseTier
+  enabledIds: string[]
+}
+
+export interface ModuleNavItem {
+  id: string
+  label: string
+  icon: string
+  path: string
+  shortcut?: string
+  keyCode?: string
+}
+
+export interface RendererModuleDefinition {
+  id: string
+  name: string
+  description: string
+  version: string
+  tier: LicenseTier
+  isCore: boolean
+  navItems: ModuleNavItem[]
+  pageComponentId: string
+}

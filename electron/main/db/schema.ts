@@ -146,3 +146,81 @@ export const customerLedger = sqliteTable('customer_ledger', {
     .notNull()
     .default(sql`(datetime('now','localtime'))`)
 })
+
+/* ------------------------------------------------------------------ */
+/*  Purchases module                                                   */
+/* ------------------------------------------------------------------ */
+
+export const suppliers = sqliteTable('suppliers', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  name: text('name').notNull(),
+  phone: text('phone'),
+  email: text('email'),
+  address: text('address'),
+  taxId: text('tax_id'),
+  notes: text('notes'),
+  currentBalance: real('current_balance').notNull().default(0),
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(true),
+  createdAt: text('created_at')
+    .notNull()
+    .default(sql`(datetime('now','localtime'))`)
+})
+
+export const purchases = sqliteTable('purchases', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  supplierId: integer('supplier_id')
+    .notNull()
+    .references(() => suppliers.id),
+  receiptNumber: text('receipt_number').notNull(),
+  subtotal: real('subtotal').notNull().default(0),
+  taxTotal: real('tax_total').notNull().default(0),
+  total: real('total').notNull().default(0),
+  paymentMethod: text('payment_method').notNull().default('cash'), // cash | card | credit
+  paymentStatus: text('payment_status').notNull().default('paid'), // paid | partial | pending
+  status: text('status').notNull().default('completed'), // draft | completed | cancelled
+  notes: text('notes'),
+  createdAt: text('created_at')
+    .notNull()
+    .default(sql`(datetime('now','localtime'))`)
+})
+
+export const purchaseItems = sqliteTable('purchase_items', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  purchaseId: integer('purchase_id')
+    .notNull()
+    .references(() => purchases.id),
+  productId: integer('product_id')
+    .notNull()
+    .references(() => products.id),
+  productName: text('product_name').notNull(),
+  quantity: real('quantity').notNull(),
+  unitCost: real('unit_cost').notNull(),
+  taxRate: real('tax_rate').notNull().default(0),
+  lineTotal: real('line_total').notNull()
+})
+
+export const supplierLedger = sqliteTable('supplier_ledger', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  supplierId: integer('supplier_id')
+    .notNull()
+    .references(() => suppliers.id),
+  purchaseId: integer('purchase_id').references(() => purchases.id),
+  amount: real('amount').notNull(),
+  type: text('type').notNull(), // 'charge' | 'payment'
+  notes: text('notes'),
+  createdAt: text('created_at')
+    .notNull()
+    .default(sql`(datetime('now','localtime'))`)
+})
+
+/* ------------------------------------------------------------------ */
+/*  App Settings (key-value store)                                     */
+/* ------------------------------------------------------------------ */
+
+export const appSettings = sqliteTable('app_settings', {
+  key: text('key').primaryKey(),
+  value: text('value').notNull(),
+  updatedAt: text('updated_at')
+    .notNull()
+    .default(sql`(datetime('now','localtime'))`)
+})

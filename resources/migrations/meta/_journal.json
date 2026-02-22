@@ -8,6 +8,20 @@
       "when": 1771710323362,
       "tag": "0000_unknown_the_watchers",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1771713371766,
+      "tag": "0001_young_synch",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1771714562372,
+      "tag": "0002_wild_millenium_guard",
+      "breakpoints": true
     }
   ]
 }

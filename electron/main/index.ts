@@ -1,8 +1,9 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, session } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { initDb } from './db/connection'
-import { registerAllHandlers } from './ipc'
+import { registerSettingsHandlers } from './ipc/settings'
+import { MODULE_REGISTRY } from './modules/registry'
 
 function createWindow(): void {
   const mainWindow = new BrowserWindow({
@@ -41,8 +42,15 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  session.defaultSession.setPermissionRequestHandler((_webContents, permission, callback) => {
+    callback(permission === 'media')
+  })
+
   initDb()
-  registerAllHandlers()
+  registerSettingsHandlers()
+  for (const mod of MODULE_REGISTRY) {
+    mod.registerHandlers()
+  }
   createWindow()
 
   app.on('activate', function () {

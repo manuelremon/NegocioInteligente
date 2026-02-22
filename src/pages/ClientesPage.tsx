@@ -8,7 +8,8 @@ import {
   Table,
   Text,
   Badge,
-  LoadingOverlay
+  LoadingOverlay,
+  Paper
 } from '@mantine/core'
 import { useDebouncedValue } from '@mantine/hooks'
 import { notifications } from '@mantine/notifications'
@@ -25,11 +26,9 @@ export default function ClientesPage(): JSX.Element {
   const [search, setSearch] = useState('')
   const [debouncedSearch] = useDebouncedValue(search, 300)
 
-  // Form modal state
   const [formOpened, setFormOpened] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState<Customer | undefined>(undefined)
 
-  // Detail drawer state
   const [detailOpened, setDetailOpened] = useState(false)
   const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null)
 
@@ -86,16 +85,20 @@ export default function ClientesPage(): JSX.Element {
       <Stack gap="md">
         {/* Header */}
         <Group justify="space-between" align="center">
-          <Title order={2}>Clientes</Title>
-          <Button onClick={handleNewCustomer}>Nuevo Cliente</Button>
+          <Title order={3} c="#1e293b">Clientes</Title>
+          <Button color="indigo" radius="md" onClick={handleNewCustomer}>
+            Nuevo Cliente
+          </Button>
         </Group>
 
         {/* Search */}
         <TextInput
-          placeholder="Buscar por nombre, teléfono o email..."
+          placeholder="Buscar por nombre, telefono o email..."
           value={search}
           onChange={(e) => setSearch(e.currentTarget.value)}
           style={{ maxWidth: 400 }}
+          radius="md"
+          size="sm"
         />
 
         {/* Table */}
@@ -105,80 +108,94 @@ export default function ClientesPage(): JSX.Element {
           {customers.length === 0 && !loading ? (
             <Text c="dimmed" ta="center" py="xl">
               {debouncedSearch
-                ? 'No se encontraron clientes con esa búsqueda'
-                : 'No hay clientes registrados. Creá uno nuevo para comenzar.'}
+                ? 'No se encontraron clientes con esa busqueda'
+                : 'No hay clientes registrados. Crea uno nuevo para comenzar.'}
             </Text>
           ) : (
-            <Table striped highlightOnHover withTableBorder>
-              <Table.Thead>
-                <Table.Tr>
-                  <Table.Th>Nombre</Table.Th>
-                  <Table.Th>Teléfono</Table.Th>
-                  <Table.Th style={{ textAlign: 'right' }}>Saldo</Table.Th>
-                  <Table.Th style={{ textAlign: 'right' }}>Límite de Crédito</Table.Th>
-                  <Table.Th>Estado</Table.Th>
-                  <Table.Th>Acciones</Table.Th>
-                </Table.Tr>
-              </Table.Thead>
-              <Table.Tbody>
-                {customers.map((customer) => (
-                  <Table.Tr key={customer.id}>
-                    <Table.Td>
-                      <Text fw={500}>{customer.name}</Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Text size="sm">{customer.phone || '-'}</Text>
-                    </Table.Td>
-                    <Table.Td style={{ textAlign: 'right' }}>
-                      {customer.currentBalance > 0 ? (
-                        <Badge color="red" variant="light" size="lg">
-                          {formatCurrency(customer.currentBalance)}
-                        </Badge>
-                      ) : (
-                        <Text size="sm" c="green" fw={500}>
-                          {formatCurrency(0)}
-                        </Text>
-                      )}
-                    </Table.Td>
-                    <Table.Td style={{ textAlign: 'right' }}>
-                      <Text size="sm">{formatCurrency(customer.creditLimit)}</Text>
-                    </Table.Td>
-                    <Table.Td>
-                      <Badge
-                        color={customer.isActive ? 'green' : 'gray'}
-                        variant="light"
-                        size="sm"
-                      >
-                        {customer.isActive ? 'Activo' : 'Inactivo'}
-                      </Badge>
-                    </Table.Td>
-                    <Table.Td>
-                      <Group gap="xs">
-                        <Button
-                          variant="light"
-                          size="xs"
-                          onClick={() => handleViewDetail(customer.id)}
-                        >
-                          Ver Detalle
-                        </Button>
-                        <Button
-                          variant="subtle"
-                          size="xs"
-                          onClick={() => handleEditCustomer(customer)}
-                        >
-                          Editar
-                        </Button>
-                      </Group>
-                    </Table.Td>
+            <Paper withBorder radius="lg" style={{ overflow: 'hidden' }}>
+              <Table highlightOnHover verticalSpacing="sm" horizontalSpacing="md">
+                <Table.Thead>
+                  <Table.Tr style={{ background: '#f8fafc' }}>
+                    <Table.Th><Text size="xs" c="#64748b" fw={600}>Nombre</Text></Table.Th>
+                    <Table.Th><Text size="xs" c="#64748b" fw={600}>Telefono</Text></Table.Th>
+                    <Table.Th ta="right"><Text size="xs" c="#64748b" fw={600}>Saldo</Text></Table.Th>
+                    <Table.Th ta="right"><Text size="xs" c="#64748b" fw={600}>Limite de Credito</Text></Table.Th>
+                    <Table.Th><Text size="xs" c="#64748b" fw={600}>Estado</Text></Table.Th>
+                    <Table.Th><Text size="xs" c="#64748b" fw={600}>Acciones</Text></Table.Th>
                   </Table.Tr>
-                ))}
-              </Table.Tbody>
-            </Table>
+                </Table.Thead>
+                <Table.Tbody>
+                  {customers.map((customer) => (
+                    <Table.Tr key={customer.id}>
+                      <Table.Td>
+                        <Text fw={500} size="sm">{customer.name}</Text>
+                      </Table.Td>
+                      <Table.Td>
+                        <Text size="sm" c="#64748b">{customer.phone || '-'}</Text>
+                      </Table.Td>
+                      <Table.Td ta="right">
+                        {customer.currentBalance > 0 ? (
+                          <Badge color="red" variant="light" size="lg" radius="md">
+                            {formatCurrency(customer.currentBalance)}
+                          </Badge>
+                        ) : (
+                          <Text size="sm" c="green" fw={500}>
+                            {formatCurrency(0)}
+                          </Text>
+                        )}
+                      </Table.Td>
+                      <Table.Td ta="right">
+                        <Text size="sm" c="#64748b">{formatCurrency(customer.creditLimit)}</Text>
+                      </Table.Td>
+                      <Table.Td>
+                        <Badge
+                          color={customer.isActive ? 'green' : 'gray'}
+                          variant="light"
+                          size="sm"
+                          radius="md"
+                        >
+                          {customer.isActive ? 'Activo' : 'Inactivo'}
+                        </Badge>
+                      </Table.Td>
+                      <Table.Td>
+                        <Group gap="xs">
+                          <Button
+                            variant="light"
+                            color="indigo"
+                            size="xs"
+                            radius="md"
+                            onClick={() => handleViewDetail(customer.id)}
+                          >
+                            Ver Detalle
+                          </Button>
+                          <Button
+                            variant="subtle"
+                            size="xs"
+                            radius="md"
+                            onClick={() => handleEditCustomer(customer)}
+                          >
+                            Editar
+                          </Button>
+                        </Group>
+                      </Table.Td>
+                    </Table.Tr>
+                  ))}
+                </Table.Tbody>
+              </Table>
+            </Paper>
           )}
         </div>
+
+        {/* Results count */}
+        {customers.length > 0 && (
+          <Paper withBorder radius="md" p="xs" px="md" bg="#f8fafc">
+            <Text size="xs" fw={500} c="#64748b">
+              {customers.length} cliente(s)
+            </Text>
+          </Paper>
+        )}
       </Stack>
 
-      {/* Modals & Drawers */}
       <CustomerFormModal
         opened={formOpened}
         onClose={() => setFormOpened(false)}
