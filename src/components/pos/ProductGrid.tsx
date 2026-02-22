@@ -2,6 +2,8 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { ActionIcon, Button, TextInput, Text, Paper, Tooltip } from '@mantine/core'
 import { notifications } from '@mantine/notifications'
 import type { Product, CartItem } from '@renderer/types/ipc'
+import { playBeep, parseScannerSettings, DEFAULT_SCANNER_SETTINGS } from '@renderer/utils/scanner'
+import type { ScannerSettings } from '@renderer/utils/scanner'
 import BarcodeScanner from './BarcodeScanner'
 
 const formatCurrency = (value: number): string =>
@@ -25,9 +27,6 @@ interface ProductSearchProps {
   onAddToCart: (item: CartItem) => void
 }
 
-// Threshold: if multiple chars arrive within this window, it's likely a scanner
-const SCANNER_INPUT_THRESHOLD_MS = 50
-
 export default function ProductSearch({ onAddToCart }: ProductSearchProps): JSX.Element {
   const [search, setSearch] = useState('')
   const [results, setResults] = useState<Product[]>([])
@@ -35,6 +34,7 @@ export default function ProductSearch({ onAddToCart }: ProductSearchProps): JSX.
   const [showResults, setShowResults] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(-1)
   const [scannerOpen, setScannerOpen] = useState(false)
+  const [scannerSettings, setScannerSettings] = useState<ScannerSettings>(DEFAULT_SCANNER_SETTINGS)
   const searchRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const lastSearchTime = useRef<number>(0)
@@ -44,12 +44,23 @@ export default function ProductSearch({ onAddToCart }: ProductSearchProps): JSX.
   const rapidCharCount = useRef<number>(0)
   const rapidInputTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Load scanner settings
+  useEffect(() => {
+    window.api.settings.getAll().then((res) => {
+      if (res.ok && res.data) {
+        setScannerSettings(parseScannerSettings(res.data as Record<string, string>))
+      }
+    })
+  }, [])
+
   useEffect(() => {
     searchRef.current?.focus()
   }, [])
 
-  // F10 global shortcut for camera scanner
+  // F10 global shortcut for camera scanner (only if camera is enabled)
   useEffect(() => {
+    if (scannerSettings.mode === 'usb') return
+
     const handler = (e: KeyboardEvent): void => {
       if (e.key === 'F10') {
         e.preventDefault()
@@ -58,7 +69,7 @@ export default function ProductSearch({ onAddToCart }: ProductSearchProps): JSX.
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [])
+  }, [scannerSettings.mode])
 
   const addProductToCart = useCallback(
     (product: Product) => {
@@ -93,7 +104,7 @@ export default function ProductSearch({ onAddToCart }: ProductSearchProps): JSX.
     [onAddToCart]
   )
 
-  const executeSearch = useCallback(async (query: string) => {
+  const executeSearch = useCallback(async (query: string, isFromScanner = false) => {
     if (!query.trim()) return
 
     const now = Date.now()
@@ -116,9 +127,11 @@ export default function ProductSearch({ onAddToCart }: ProductSearchProps): JSX.
           })
           setResults([])
           setShowResults(false)
-        } else if (products.length === 1) {
+        } else if (products.length === 1 && scannerSettings.autoAdd) {
+          if (isFromScanner && scannerSettings.sound) playBeep()
           addProductToCart(products[0])
         } else {
+          if (isFromScanner && scannerSettings.sound) playBeep()
           setResults(products)
           setShowResults(true)
           setSelectedIndex(0)
@@ -141,7 +154,7 @@ export default function ProductSearch({ onAddToCart }: ProductSearchProps): JSX.
         setLoading(false)
       }
     }
-  }, [addProductToCart])
+  }, [addProductToCart, scannerSettings.autoAdd, scannerSettings.sound])
 
   const handleSearch = useCallback(() => {
     executeSearch(search)
@@ -151,7 +164,7 @@ export default function ProductSearch({ onAddToCart }: ProductSearchProps): JSX.
     (code: string) => {
       setScannerOpen(false)
       setSearch(code)
-      executeSearch(code)
+      executeSearch(code, true)
       searchRef.current?.focus()
     },
     [executeSearch]
@@ -161,12 +174,14 @@ export default function ProductSearch({ onAddToCart }: ProductSearchProps): JSX.
     const value = e.currentTarget.value
     setSearch(value)
 
-    // USB scanner rapid-input detection
+    // USB scanner rapid-input detection (disabled in camera-only mode)
+    if (scannerSettings.mode === 'camera') return
+
     const now = Date.now()
     const timeSinceLastInput = now - lastInputTime.current
     lastInputTime.current = now
 
-    if (timeSinceLastInput < SCANNER_INPUT_THRESHOLD_MS) {
+    if (timeSinceLastInput < scannerSettings.rapidMs) {
       rapidCharCount.current++
     } else {
       rapidCharCount.current = 1
@@ -178,7 +193,7 @@ export default function ProductSearch({ onAddToCart }: ProductSearchProps): JSX.
       rapidInputTimer.current = setTimeout(() => {
         rapidCharCount.current = 0
         if (value.trim()) {
-          executeSearch(value)
+          executeSearch(value, true)
         }
       }, 80)
     }
@@ -246,6 +261,9 @@ export default function ProductSearch({ onAddToCart }: ProductSearchProps): JSX.
     }
   }, [])
 
+  const showCameraButton = scannerSettings.mode !== 'usb'
+  const showUsbIndicator = scannerSettings.mode !== 'camera'
+
   return (
     <>
       <div style={{
@@ -257,18 +275,20 @@ export default function ProductSearch({ onAddToCart }: ProductSearchProps): JSX.
       }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           {/* Barcode scanner ready indicator */}
-          <Tooltip label="Lector USB listo — escanea un codigo" position="bottom" withArrow>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#6366f1',
-              opacity: 0.7,
-              flexShrink: 0
-            }}>
-              <IconBarcode />
-            </div>
-          </Tooltip>
+          {showUsbIndicator && (
+            <Tooltip label="Lector USB listo — escanea un codigo" position="bottom" withArrow>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#6366f1',
+                opacity: 0.7,
+                flexShrink: 0
+              }}>
+                <IconBarcode />
+              </div>
+            </Tooltip>
+          )}
 
           <div style={{ flex: 1, position: 'relative' }}>
             <TextInput
@@ -408,17 +428,19 @@ export default function ProductSearch({ onAddToCart }: ProductSearchProps): JSX.
           >
             Agregar
           </Button>
-          <Tooltip label="Escanear con camara (F10)" position="bottom" withArrow>
-            <ActionIcon
-              variant="light"
-              color="indigo"
-              size="lg"
-              onClick={() => setScannerOpen(true)}
-              aria-label="Abrir escaner de camara"
-            >
-              <IconCamera />
-            </ActionIcon>
-          </Tooltip>
+          {showCameraButton && (
+            <Tooltip label="Escanear con camara (F10)" position="bottom" withArrow>
+              <ActionIcon
+                variant="light"
+                color="indigo"
+                size="lg"
+                onClick={() => setScannerOpen(true)}
+                aria-label="Abrir escaner de camara"
+              >
+                <IconCamera />
+              </ActionIcon>
+            </Tooltip>
+          )}
         </div>
       </div>
 
@@ -426,6 +448,7 @@ export default function ProductSearch({ onAddToCart }: ProductSearchProps): JSX.
         opened={scannerOpen}
         onClose={() => setScannerOpen(false)}
         onScan={handleScanResult}
+        preferredCameraId={scannerSettings.cameraId || undefined}
       />
     </>
   )
